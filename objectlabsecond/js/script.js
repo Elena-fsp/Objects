@@ -121,7 +121,6 @@ class Bank {
     let sumBalance = this.sumBalance(convertCreditAccounts);
     return `${amountActive}чел на сумму${-(sumBalance)}`;
   }
-  
   async calcDebtDollarsNotActiveClients() {
     let notActiveClients = this.searchClients('active', item => item === 'неактивный');
     let amountNotActive = notActiveClients.length;
@@ -131,7 +130,6 @@ class Bank {
     return `${amountNotActive}чел на сумму ${-(sumBalance)}`;
   }
 }   
-
 class Client {
   constructor(clientInformation) {
     this.identificationСode = clientInformation.identificationСode;
@@ -165,7 +163,10 @@ class CreditAccount extends Accounts {
 }
 
 let bank, client, debetAccount, creditAccount, allMoney, allDebt, activeDebt, noActiveDebt, result;
-renderHTML();
+addDivsOnPage();
+addButtonsOnPage();
+addTableOnPage();
+createForms();
 openBank();
 openCard('.create_client_card', '.client_card');
 openCard('.debet_account_card', '.debit_card');
@@ -174,6 +175,9 @@ openAllMoney();
 openDebt();
 openActive();
 openNactive();
+addClient();
+addDebitAccount();
+addCreditAccount();
 closeForm('form_client', '.close', '.client_card');
 closeForm('form_debit', '.close_debet', '.debit_card');
 closeForm('form_credit', '.close_credit', '.credit_card');
@@ -181,30 +185,22 @@ closeForm('form_all_money', '.close_all_money', '.all_card');
 closeForm('form_debt', '.close_debt', '.debt_card');
 closeForm('form_active', '.close_active', '.active_card');
 closeForm('form_nactive', '.close_nactive', '.nactive_card');
-addClient();
-addDebitAccount();
-addCreditAccount();
 
-function renderHTML() {
-  let body = document.querySelector('body');
+function createDivBlocks() {
   let divs = [];
-  let buttons = [];
-  let divsClass = ['container', 'open_bank', 'bank_container', 'create_client', 'debet_account', 'credit_account', 'all_money', 'all_debt', 'debt_active', 'debt_nactive' ];
-  let buttonsClass = ['open', 'create_client_card', 'debet_account_card', 'credit_account_card', 'all_money_card', 'all_debt_card', 'debt_active_card', 'debt_nactive_card' ];
-  let buttonsText = ['Открыть банк', 'Создать Клиента', 'Открыть дебетовый счет', 'Открыть кредитовый счет', 'Посчитать количество денег в банке (доллары)', 'Сумма задолженности(доллары)', 'Сумма задолженности Aктивныe Клиенты', 'Сумма задолженности Неактивные Клиенты'];
-  
+  let divsClass = ['container', 'open_bank', 'bank_container', 'create_client', 'debet_account', 'credit_account', 'all_money', 'all_debt', 'debt_active', 'debt_nactive'];
   for(let i = 0; i < divsClass.length; i++) {
     let div = document.createElement('div');
     div.setAttribute('class', divsClass[i]);
     div.classList.add('bank');
     divs.push(div);
   }
-  body.appendChild(divs[0]);
-  divs[0].appendChild(divs[1]);
-  divs[0].appendChild(divs[2]);
-  for(let i = 3; i < divs.length; i++) {
-    divs[2].appendChild(divs[i]);
-  }
+  return  divs;
+}
+function createButtons() {
+  let buttons = [];
+  let buttonsClass = ['open', 'create_client_card', 'debet_account_card', 'credit_account_card', 'all_money_card', 'all_debt_card', 'debt_active_card', 'debt_nactive_card' ];
+  let buttonsText = ['Открыть банк', 'Создать Клиента', 'Открыть дебетовый счет', 'Открыть кредитовый счет', 'Посчитать количество денег в банке (доллары)', 'Сумма задолженности(доллары)', 'Сумма задолженности Aктивныe Клиенты', 'Сумма задолженности Неактивные Клиенты'];
   for(let i = 0; i < buttonsClass.length && i < buttonsText.length; i++) {
     let button = document.createElement('button');
     button.setAttribute('class', buttonsClass[i]);
@@ -212,59 +208,42 @@ function renderHTML() {
     button.classList.add('btn');
     buttons.push(button);
   }
+  return buttons;
+}
+function createForms() {
+  let forms = [];
+  let divs = document.querySelectorAll('div');
+  forms[0] = createForm(divs[1], 'client_card', 'form_client', ['id_inn', 'id_name', 'id_active'], ['Введите ИНН Клиента','Введите Имя Клиента', 'aктивный/неактивный'],['add_client', 'close'], ['Добавить Клиента', 'Выйти']);
+  forms[1] = createForm(divs[2], 'debit_card', 'form_debit', ['id_inn_client', 'id_active_debit', 'id_card_data_debit', 'id_currency_debit', 'id_balance_debit'], ['Введите ИНН Клиента','Активный или Неактивный счет', 'Срок действия карты', 'Тип валюты', 'Введите баланс'], ['add_debit_account', 'close_debet'], ['Добавить Счет Клиенту', 'Выйти']);
+  forms[2] = createForm(divs[3], 'credit_card', 'form_credit', ['id_inn_client_credit', 'id_active_credit', 'id_card_data_credit', 'id_currency_credit', 'id_funds', 'limit'], ['Введите ИНН Клиента','Активный или Неактивный счет', 'Срок действия карты', 'Тип валюты', 'Личные средства', 'Лимит'], ['add_credit_account', 'close_credit'], ['Добавить Счет Клиенту', 'Выйти']);
+  forms[3] = createForm(divs[4], 'all_card', 'form_all_money', ['id_amount_all'],[], ['close_all_money'], ['Закрыть']);
+  forms[4] = createForm(divs[5], 'debt_card', 'form_debt', ['id_debt'], [], ['close_debt'], ['Закрыть']);
+  forms[5] = createForm( divs[6],'active_card', 'form_active', ['id_active'], [], ['close_active'], ['Закрыть']);
+  forms[6] = createForm(divs[7], 'nactive_card', 'form_nactive', ['id_nactive'], [], ['close_nactive'], ['Закрыть']);
+  return forms;
+}
+function addTableOnPage() {
+  let div = document.querySelector('.create_client');
+  let table = createTable(['ИНН Клиента', 'Имя Клиента', 'Активность', 'Дата регистрации']);
+  div.appendChild(table);
+}
+function addDivsOnPage() {
+  let body = document.querySelector('body');
+  let divs = createDivBlocks();
+  body.appendChild(divs[0]);
+  divs[0].appendChild(divs[1]);
+  divs[0].appendChild(divs[2]);
+  for(let i = 3; i < divs.length; i++) {
+    divs[2].appendChild(divs[i]);
+  }
+}
+function addButtonsOnPage () {
+  let divs = document.querySelectorAll('div');
+  let buttons = createButtons();
   divs[1].appendChild(buttons[0]);
   for(let i = 3; i < divs.length; i++) {
     divs[i].appendChild(buttons[i - 2]);
   }
-  let divTable = document.createElement('div');
-  divTable.setAttribute('style', 'overflow-x:auto;');
-  divs[3].appendChild(divTable);
-  let table = document.createElement('table');
-  table.classList.add('table');
-  divTable.appendChild(table);
-  let tr = document.createElement('tr');
-  table.appendChild(tr);
-  let thInnerText = ['ИНН Клиента', 'Имя Клиента', 'Активность', 'Дата регистрации'];
-  for(let i = 0; i < thInnerText.length; i++) {
-    let th = document.createElement('th');
-    th.innerText = thInnerText[i];
-    th.classList.add('th');
-    tr.appendChild(th);
-  }
-  function createForm(divParent, classDiv, idForm, inputsID, placeholders, buttonsClass, buttonsText) {
-    let divForm = document.createElement('div');
-    divForm.setAttribute('class', classDiv);
-    divForm.classList.add('form-popup');
-    let form = document.createElement('form');
-    form.setAttribute('id', idForm);
-    form.classList.add('form-container');
-    for(let i = 0; i < inputsID.length; i++) {
-      let label = document.createElement('label');
-      form.appendChild(label);
-      let input = document.createElement('input');
-      input.setAttribute('id', inputsID[i]);
-      input.setAttribute('placeholder', placeholders[i]);
-      input.classList.add('input_form');
-      form.appendChild(input);
-    }
-    divParent.appendChild(divForm);
-    divForm.appendChild(form);
-    for(let i = 0; i < buttonsText.length; i++) {
-      let button = document.createElement('button');
-      button.setAttribute('type', 'submit');
-      button.setAttribute('class', buttonsClass[i]);
-      button.innerText = buttonsText[i];
-      button.classList.add('btn_form');
-      form.appendChild(button);
-    }
-  }
-  createForm(divs[3], 'client_card', 'form_client', ['id_inn', 'id_name', 'id_active'], ['Введите ИНН Клиента','Введите Имя Клиента', 'Активный/Неактивный'], ['add_client', 'close'], ['Добавить Клиента', 'Выйти']);
-  createForm(divs[4], 'debit_card', 'form_debit', ['id_inn_client', 'id_active_debit', 'id_card_data_debit', 'id_currency_debit', 'id_balance_debit'], ['Введите ИНН Клиента','Активный или Неактивный счет', 'Срок действия карты', 'Тип валюты', 'Введите баланс'], ['add_debit_account', 'close_debet'], ['Добавить Счет Клиенту', 'Выйти']);
-  createForm(divs[5], 'credit_card', 'form_credit', ['id_inn_client_credit', 'id_active_credit', 'id_card_data_credit', 'id_currency_credit', 'id_funds', 'limit'], ['Введите ИНН Клиента','Активный или Неактивный счет', 'Срок действия карты', 'Тип валюты', 'Личные средства', 'Лимит'], ['add_credit_account', 'close_credit'], ['Добавить Счет Клиенту', 'Выйти']);
-  createForm(divs[6], 'all_card', 'form_all_money', ['id_amount_all'], [''], ['close_all_money'], ['Закрыть']);
-  createForm(divs[7], 'debt_card', 'form_debt', ['id_debt'], [''], ['close_debt'], ['Закрыть']);
-  createForm(divs[8], 'active_card', 'form_active', ['id_active'], [''], ['close_active'], ['Закрыть']);
-  createForm(divs[9], 'nactive_card', 'form_nactive', ['id_nactive'], [''], ['close_nactive'], ['Закрыть']);
 }
 function openBank() {
   let button = document.querySelector('.open');
@@ -283,10 +262,16 @@ function openCard(buttonClass, divClass) {
   })
 }
 function addClient() {
+  let buttonOpen = document.querySelector('.create_client_card');
   let button = document.querySelector('.add_client');
   let div = document.querySelector('.client_card');
   let form = document.getElementById('form_client');
   let table = document.querySelector('.table');
+  buttonOpen.addEventListener ('click', function open(event) {
+    event.preventDefault();
+    div.style.display = 'block';
+    buttonOpen.removeEventListener('click', open);
+  })
   button.addEventListener('click', (event) => {
     event.preventDefault();
     let clientInformation = {
@@ -300,7 +285,6 @@ function addClient() {
     clientInformation.identificationСode = document.getElementById('id_inn').value;
     clientInformation.name = document.getElementById('id_name').value;
     clientInformation.active = document.getElementById('id_active').value;
-    console.log(clientInformation);
     client = bank.addClient(clientInformation);
     let tr = document.createElement('tr');
     tr.classList.add('tr');
@@ -407,4 +391,48 @@ function closeForm(idForm, buttonsClass, divsClass) {
     div.style.display = 'none';
     form.reset();
   })
+}
+function createForm(divParent, classDiv, idForm, inputsID, placeholders, buttonsClass, buttonsText) {
+  let divForm = document.createElement('div');
+  divForm.setAttribute('class', classDiv);
+  divForm.classList.add('form-popup');
+  divParent.appendChild(divForm);
+  let form = document.createElement('form');
+  form.setAttribute('id', idForm);
+  form.classList.add('form-container');
+  for(let i = 0; i < inputsID.length; i++) {
+    let label = document.createElement('label');
+    form.appendChild(label);
+    let input = document.createElement('input');
+    input.setAttribute('id', inputsID[i]);
+    input.setAttribute('placeholder', placeholders[i]);
+    input.classList.add('input_form');
+    form.appendChild(input);
+  }
+  divForm.appendChild(form);
+  for(let i = 0; i < buttonsText.length; i++) {
+    let button = document.createElement('button');
+    button.setAttribute('type', 'submit');
+    button.setAttribute('class', buttonsClass[i]);
+    button.innerText = buttonsText[i];
+    button.classList.add('btn_form');
+    form.appendChild(button);
+  }
+  return divParent; 
+}
+function createTable(thInnerText) {
+  let divTable = document.createElement('div');
+  divTable.setAttribute('style', 'overflow-x:auto;');
+  let table = document.createElement('table');
+  table.classList.add('table');
+  divTable.appendChild(table);
+  let tr = document.createElement('tr');
+  table.appendChild(tr);
+  for(let i = 0; i < thInnerText.length; i++) {
+    let th = document.createElement('th');
+    th.innerText = thInnerText[i];
+    th.classList.add('th');
+    tr.appendChild(th);
+  }
+  return divTable;
 }
