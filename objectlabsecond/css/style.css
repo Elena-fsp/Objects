@@ -1,28 +1,150 @@
+* {
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+}
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+:focus,
+:active {
+	 outline: none;
+}
+a:focus,
+a:active {
+	outline: none;
+}
+html,
+body {
+	height: 100%;
+}
+body {
+	-ms-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+button {
+	cursor: pointer;
+	color: inherit;
+	background-color: inherit;
+}
+a {
+	color: inherit;
+}
+a:link,
+a:visited {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: none;
+}
+ul li {
+	list-style: none;
+}
+img {
+	vertical-align: top;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: inherit;
+	font-size: inherit;
+}
+
+   body {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.container {
+  max-width: 1530px;
+  box-sizing: content-box;
+  margin: 0 auto;
+  padding-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 18px 30px;
+  border-radius: 50px;
+  background-color: #2155CF;
+  letter-spacing: 0.08em;
+  color:  #FFFFFF;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+table {
+  display: block;
+  margin-top: 50px;
+  /* border-collapse: collapse; */
+  border: 1px solid grey;
+  margin-bottom: 100px;
+}
+
+th {
+  border: 1px solid grey;
+}
+td {
+  border: 1px solid grey;
+}
+th, td {
+  padding: 10px 15px;
+}
+
+.form-popup {
+  display: none;
+  margin-bottom: 50px;
+  position: fixed;
+  top:5%;
+  left: 33,33%;
+  border: 3px solid #f1f1f1;
+}
+.form-popup-show {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+  position: fixed;
+  top:5%;
+  left: 33,33%;
+  border: 3px solid #f1f1f1;
+  background:#f1f1f1;
+
+}
+
 .bank_container {
   display: none;
   width: 100%;
   border: none;
   color: white;
   background-color: #e1e433;
-  padding: 14px 28px; 
-  text-align: center;
-}
-
-.btn {
-  display: block;
-  width: 100%;
-  border: none;
-  color: white;
   padding: 14px 28px;
-  font-size: 16px;
-  cursor: pointer;
-  background-color: #4CAF50;
+  text-align: center;
+  padding-bottom: 60px;
+  background:#f1f1f1;
 }
-
+/* Окаймленная форма */
 form {
   border: 3px solid #f1f1f1;
 }
 
+/* Входы полной ширины */
 .input_text {
   width: 100%;
   padding: 12px 20px;
@@ -31,50 +153,20 @@ form {
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  width: 100%;
-  border: 1px solid rgb(22, 8, 8); 
-}
-
-th, td {
-  text-align: left;
-  padding: 8px;
-}
-
-.form-popup {
-  display: none;
-  position: fixed;
-  bottom:0;
-  right: 40%;
-  border: 3px solid #f1f1f1;
-}
-
 .form-container {
-  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 700px;
   padding: 10px;
   background-color: white;
 }
 
 .form-container .input_form {
-  width: 70%;
+  width: 80%;
   padding: 15px;
   margin: 5px 0 22px 0;
   border: none;
   background: #f1f1f1;
 }
-
-.form-container .btn_form {
-  background-color: #4CAF50;
-  color: white;
-  padding: 16px 20px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  margin-bottom:10px;
-  opacity: 0.8;
-}
-tr:nth-child(even)
-{background-color: #beeb76}
