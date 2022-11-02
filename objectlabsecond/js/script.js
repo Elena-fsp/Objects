@@ -5,24 +5,107 @@ class Bank {
   constructor() {
     this.clients = [];
     this.createMenuBank();
-    this.addClient();
+    this.addClient(); 
     this.addDebitAccount();
+    this.addCreditAccount();
   }
   createMenuBank() {
     let menu = new Page();
     return menu;
   }
   addClient() {
-    let button =  document.querySelector('.add_client');
-    let div = document.querySelector('.client_form');
     let card = document.getElementById('client-form');
-    button.addEventListener('click', () => {
-      let client = new Client();
-      this.clients.push(client);
-      this.showClient(client);
-      div.classList.remove('form-popup-show');
-      card.reset();
+    let regexID = /^[0-9]{10}$/;
+    let regexName = /^[a-zа-яё]+(?: [a-zа-яё]+)?$/i;
+    let error = this.createError('Ошибка! Данные введены не коректно или не все поля заполнены');
+    document.querySelector('.add_client').addEventListener('click', (event) => {
+      event.preventDefault();
+      let information = {};
+      information['identificationСode'] = +document.getElementById('id_inn').value;
+      information['name'] = document.getElementById('id_name').value;
+      information['isActive'] = Boolean(document.getElementById('id_active').value);
+      if(this.checkIsEmptyFields(card.querySelectorAll('.field')) && regexID.test(information['identificationСode']) && regexName.test(information['name'])) {
+        let client = new Client(information);
+        this.clients.push(client);
+        this.showClient(client);
+        error.remove();
+        document.querySelector('.client-card').classList.remove('form-popup-show');
+        card.reset();
+      } else {
+        card.appendChild(error);
+      }
     })
+  }
+  addDebitAccount() {
+    let card = document.getElementById('debit-form');
+    let regexID = /^[0-9]{10}$/;
+    let regexBalance = /^[0-9]{3,9}$/;
+    let error = this.createError('Ошибка! Данные введены не коректно или не все поля заполнены');
+    document.querySelector('.add_debit_account').addEventListener('click', (event) => {
+      event.preventDefault();
+      let information = {};
+      information['identificationСode'] = +document.getElementById('id_inn_debit').value;
+      information['isActiveAccount'] = Boolean(document.getElementById('id_active_debit').value);
+      information['cardExpiryDate'] = document.getElementById('id_card_data_debit').value;
+      information['currencyType'] = document.getElementById('id_currency_debit').value;
+      information['balance'] = +document.getElementById('id_debit_balance').value;
+      if(this.checkIsEmptyFields(card.querySelectorAll('.field')) && regexID.test(information['identificationСode']) && regexBalance.test(information['balance'])) {
+        let account = new DebitAccount(information);
+        let client = this.searchClient(information.identificationСode);
+        client.debitAccounts.push(account);
+        error.remove();
+        document.querySelector('.debit-card').classList.remove('form-popup-show');
+        card.reset();
+      } else {
+        card.appendChild(error);
+      }
+    })
+  }
+  addCreditAccount() {
+    let card = document.getElementById('credit-form');
+    let regexID = /^[0-9]{10}$/;
+    let regexFunds = /^[0-9]{3,9}$/;
+    let error = this.createError('Ошибка! Данные введены не коректно или не все поля заполнены');
+    document.querySelector('.add_credit_account').addEventListener('click', (event) => {
+      event.preventDefault();
+      let information = {};
+      information['identificationСode'] = +document.getElementById('id_inn_credit').value;
+      information['isActiveAccount'] = Boolean(document.getElementById('id_active_credit').value);
+      information['cardExpiryDate'] = document.getElementById('id_card_data_credit').value;
+      information['currencyType'] = document.getElementById('id_currency_credit').value;
+      information['personalFunds'] = +document.getElementById('id_personal_funds').value;
+      information['limit'] = +document.getElementById('id_limit').value;
+      if(this.checkIsEmptyFields(card.querySelectorAll('.field')) && regexID.test(information['identificationСode']) && regexFunds.test(information['personalFunds']) && regexFunds.test(information['limit']) ) {
+        let account = new CreditAccount(information);
+        let client = this.searchClient(information.identificationСode);
+        client.creditAccounts.push(account);
+        error.remove();
+        document.querySelector('.credit-card').classList.remove('form-popup-show');
+        card.reset();
+      } else {
+        card.appendChild(error);
+      }
+    })
+  }
+  createError(innerText) {
+    let error = document.createElement('div');
+    error.className ='error';
+    error.style.color = 'red';
+    error.innerText = innerText;
+    return error;
+  }
+  checkIsEmptyFields(array) {
+    let fields = array;
+    let result;
+    for(let i = 0; i < fields.length; i++) {
+      if(fields[i].value !== '') {
+        result = true;
+      } else {
+        result = false;
+        break;
+      }
+    }
+    return result;
   }
   showClient(client) {
     let table =  document.querySelector('.table');
@@ -30,46 +113,44 @@ class Bank {
     tr.classList.add('tr');
     table.appendChild(tr);
     for(let key in client) {
+      if(key === 'debitAccounts' || key === 'creditAccounts') {
+        continue;
+      }
       let td = document.createElement('td');
       tr.appendChild(td);
       td.classList.add('td');
       td.innerText = client[key];
     }
   }
-  addDebitAccount() {
-    let button =  document.querySelector('.add_debit_account');
-    let div = document.querySelector('.form_debit');
-    let card = document.getElementById('client-form');
-    button.addEventListener('click', () => {
-      let account = new DebitAccount();
-      let client = this.searchClient(account.identificationСode);
-      client.debitAccounts.push(account);
-      div.classList.remove('form-popup-show');
-      card.reset();
-    })
-  }
-  searchClient(identificationСode) {
-    let client = this.clients.find(client => client.identificationСode === identificationСode);
-    return client;
-  }
 } 
 class Client {
-  constructor() {
-    this.identificationСode =  document.getElementById('id_inn').value
-    this.name = document.getElementById('id_name').value;
-    this.active = document.getElementById('id_active').value;
+  constructor(information) {
+    this.identificationСode = information.identificationСode;
+    this.name = information.name;
+    this.isActive = information.isActive;
     this.registrationDate = new Date();
     this.debitAccounts = [];
-    this.creditAccounts = [];
-  }  
+    this.creditAccounts = [];  
+  }   
 }
 class DebitAccount {
-  constructor() {
-    this.identificationСode = document.getElementById('id_inn_client').value;
-    this.activeAccount = document.getElementById('id_active_debit').value;
-    this.cardExpiryDate = document.getElementById('id_card_data_debit').value;
-    this.currencyType = document.getElementById('id_currency_debit').value;
-    this.balance = document.getElementById('id_balance_debit').value; 
+  constructor(information) {
+    this.identificationСode = information.identificationСode;
+    this.isActiveAccount = information.isActiveAccount;
+    this.cardExpiryDate = information.cardExpiryDate;
+    this.currencyType = information.currencyType;
+    this.balance = information.balance;
+  }
+}
+class CreditAccount {
+  constructor(information) {
+    this.identificationСode = information.identificationСode;
+    this.isActiveAccount = information.isActiveAccount;
+    this.cardExpiryDate = information.cardExpiryDate;
+    this.currencyType = information.currencyType;
+    this.personalFunds = information.personalFunds;
+    this.limit = information.limit;
+    this.balance = information.personalFunds - information.limit;
   }
 }
 class Page {
@@ -79,15 +160,20 @@ class Page {
   createPage() {
     let page = this.collectBlocksPage();
     this.openCards();
+    this.сloseCards();
   }
   collectBlocksPage() {
     let container = this.createContainer();
     let buttonCreateClient = this.createButton('Cоздать Клиента', 'create_client');
     let buttonOpenDebetAccount = this.createButton('Открыть дебетовый счет', ' open_debet');
+    let buttonOpenCreditAccount = this.createButton('Открыть кредитовый счет', ' open_credit');
+    let buttonCalcAllMoney = this.createButton('Показать всего денег в банке', ' open_credit');
     let table = this. createTable();
     let clientCard = this.createClientCard();
-    let debetCard = this.createDebetCard();
-    let page = container.append(buttonCreateClient, table, clientCard, debetCard, buttonOpenDebetAccount);
+    let debitCard = this.createDebitCard();
+    let creditCard = this.createCreditCard();
+    let allMoneyCard = this.createAllMoneyCard();
+    let page = container.append(buttonCreateClient, table, buttonOpenDebetAccount, buttonOpenCreditAccount, buttonCalcAllMoney, clientCard, debitCard, creditCard,allMoneyCard);
     return page;
   }
   createContainer() {
@@ -97,19 +183,128 @@ class Page {
     body.appendChild(container);
     return container;
   }
+  createTable() {
+    let table = document.createElement('table');
+    table.classList.add('table');
+    let tr = document.createElement('tr');
+    table.appendChild(tr);
+    let thInnerText = ['ИНН', 'Имя Клиента', 'Активность', 'Дата регистрации'];
+    for(let i = 0; i < thInnerText.length; i++) {
+      let th = document.createElement('th');
+      th.innerText = thInnerText[i];
+      th.classList.add('th');
+      tr.appendChild(th);
+    }
+    return table;
+  }
   createClientCard() {
-    let clientCard = this.createForm('client_form',['id_inn', 'id_name', 'id_active'], ['Введите ИНН Клиента','Введите Имя Клиента', 'aктивный/неактивный'] );
+    let card = this.createCard('client-card');
+    let form = this.createForm('client-form');
+    let fieldIdentificationСode = this.createInput('id_inn', 'Введите ИНН Клиента');
+    let fieldName = this.createInput('id_name', 'Введите Имя Клиента');
+    let fieldIsActive = this.createSelect('id_active');
+    let activeOption = this.createOption(' ', 'Активный аккаунт');
+    let inactiveOption = this.createOption('', 'Неактивный аккаунт');
     let buttonAdd = this.createButton('Добавить Клиента', 'add_client');
     let buttonClose = this.createButton('Закрыть', 'сlose', 'client_form');
-    clientCard.append(buttonAdd, buttonClose);
-    return clientCard;
+    fieldIsActive.append(activeOption, inactiveOption);
+    form.append(fieldIdentificationСode, fieldName, fieldIsActive);
+    card.append(form, buttonAdd, buttonClose);
+    return card;
   }
-  createDebetCard() {
-    let debetCard = this.createForm('form_debit', ['id_inn_client', 'id_active_debit', 'id_card_data_debit', 'id_currency_debit', 'id_balance_debit'], ['Введите ИНН Клиента','Активный или Неактивный счет', 'Срок действия карты', 'Тип валюты', 'Введите баланс'] );
-    let buttonAdd = this.createButton('Добавить счет', 'add_debit_account');
-    let buttonClose = this.createButton('Отменить', 'сlose', 'form_debit');
-    debetCard.append(buttonAdd, buttonClose);
-    return debetCard;
+  createDebitCard() {
+    let card = this.createCard('debit-card');
+    let form = this.createForm('debit-form');
+    let fieldIdentificationСode = this.createInput('id_inn_debit', 'Введите ИНН Клиента');
+    let fieldIsActivAccount = this.createSelect('id_active_debit');
+    let activeOption = this.createOption(' ', 'Активный аккаунт');
+    let inactiveOption = this.createOption('', 'Неактивный аккаунт');
+    let fieldCardExpiryDate = this.createInput('id_card_data_debit', 'Срок действия карты');
+    let fieldCurrencyType = this.createSelect('id_currency_debit', 'Введите срок действия карты');
+    let uaнOption = this.createOption('UAH', 'UAH');
+    let usdOption = this.createOption('USD', 'USD');
+    let eurOption = this.createOption('EUR', 'EUR');
+    let fieldBalance = this.createInput('id_debit_balance', 'Введите баланс');
+    let buttonAdd = this.createButton('Добавить счет Клиенту', 'add_debit_account');
+    let buttonClose = this.createButton('Закрыть', 'сlose', 'client_form');
+    fieldIsActivAccount.append(activeOption, inactiveOption);
+    fieldCurrencyType.append(uaнOption, usdOption, eurOption);
+    form.append(fieldIdentificationСode, fieldIsActivAccount, fieldCardExpiryDate, fieldCurrencyType, fieldBalance);
+    card.append(form, buttonAdd, buttonClose);
+    return card;
+  }
+  createCreditCard() {
+    let card = this.createCard('credit-card');
+    let form = this.createForm('credit-form');
+    let fieldIdentificationСode = this.createInput('id_inn_credit', 'Введите ИНН Клиента');
+    let fieldIsActivAccount = this.createSelect('id_active_credit');
+    let activeOption = this.createOption(' ', 'Активный аккаунт');
+    let inactiveOption = this.createOption('', 'Неактивный аккаунт');
+    let fieldCardExpiryDate = this.createInput('id_card_data_credit', 'Срок действия карты');
+    let fieldCurrencyType = this.createSelect('id_currency_credit', 'Введите срок действия карты');
+    let uaнOption = this.createOption('UAH', 'UAH');
+    let usdOption = this.createOption('USD', 'USD');
+    let eurOption = this.createOption('EUR', 'EUR');
+    let fieldPersonalFunds = this.createInput('id_personal_funds', 'Введите сумму личных средств');
+    let fieldLimit = this.createInput('id_limit', 'Установите лимит');
+    let buttonAdd = this.createButton('Добавить счет Клиенту', 'add_credit_account');
+    let buttonClose = this.createButton('Закрыть', 'сlose', 'client_form');
+    fieldIsActivAccount.append(activeOption, inactiveOption);
+    fieldCurrencyType.append(uaнOption, usdOption, eurOption);
+    form.append(fieldIdentificationСode, fieldIsActivAccount, fieldCardExpiryDate, fieldCurrencyType, fieldPersonalFunds, fieldLimit);
+    card.append(form, buttonAdd, buttonClose);
+    return card;
+  }
+  createAllMoneyCard() {
+    let card = this.createCard('all-money-card');
+    let form = this.createForm('all-money-form');
+    let input = this.createInput('id_all_money', '');
+    let buttonClose = this.createButton('Закрыть', 'сlose', 'client_form');
+    let buttonCalc = this.createButton('Показать сумму', 'calc_all_money');
+    form.append(input);
+    card.append(form,  buttonCalc, buttonClose);
+    return card;
+  }
+
+  createButton(buttonsText, className) {
+    let button = document.createElement('button');
+    button.innerText = buttonsText;
+    button.setAttribute('class', className);
+    button.setAttribute('type', 'submit');
+    button.classList.add('button');
+    return button;
+  }
+  createCard(divClass) {
+    let card = document.createElement('div');
+    card.classList.add('form-popup');
+    card.classList.add(divClass);
+    return card;
+  }
+  createForm(idForm) {
+    let form = document.createElement('form');
+    form.setAttribute('id', idForm);
+    form.classList.add('form-container');
+    return form;
+  }
+  createInput(idInput, placeholderText) {
+    let input = document.createElement('input');
+    input.setAttribute('id', idInput);
+    input.classList.add('field');
+    input.classList.add('input_form');
+    input.setAttribute('placeholder', placeholderText);
+    return input;
+  }
+  createSelect(idSelect) {
+    let select = document.createElement('select');
+    select.setAttribute('id', idSelect);
+    select.classList.add('input_form');
+    return select;
+  }
+  createOption(value, innerText) {
+    let option = document.createElement('option');
+    option.setAttribute('value', value);
+    option.innerText = innerText;
+    return option;
   }
   openCards() {
     let buttons = document.querySelectorAll('div.container > button');
@@ -120,45 +315,15 @@ class Page {
       })
     }
   }
-  createTable() {
-    let table = document.createElement('table');
-    table.classList.add('table');
-    let tr = document.createElement('tr');
-    table.appendChild(tr);
-    let thInnerText = ['ИНН', 'Имя Клиента', 'Активность', 'Дата регистрации',  'Дебетовые счета', 'Кредитовые счета'];
-    for(let i = 0; i < thInnerText.length; i++) {
-      let th = document.createElement('th');
-      th.innerText = thInnerText[i];
-      th.classList.add('th');
-      tr.appendChild(th);
+  сloseCards() {
+    let buttons = document.querySelectorAll('.сlose');
+    let cards = document.querySelectorAll('div.container > div');
+    for(let i = 0; i < buttons.length; i++) {
+      buttons[i].addEventListener('click', () => {
+        cards[i].classList.remove('form-popup-show');
+      })
     }
-    return table;
-  }
-  createForm(classDivForm, inputsID, placeholders) {
-    let divForm = document.createElement('div');
-    divForm.setAttribute('class', classDivForm);
-    divForm.classList.add('form-popup');
-    let form = document.createElement('form');
-    form.setAttribute('id', 'client-form');
-    form.classList.add('form-container');
-    for(let i = 0; i < inputsID.length; i++) {
-      let input = document.createElement('input');
-      input.setAttribute('id', inputsID[i]);
-      input.setAttribute('placeholder', placeholders[i]);
-      input.classList.add('input_form');
-      form.appendChild(input);
-    }
-    divForm.appendChild(form);
-    return divForm;
-  }
-  createButton(buttonsText, className) {
-    let button = document.createElement('button');
-    button.innerText = buttonsText;
-    button.setAttribute('class', className);
-    button.setAttribute('type', 'submit');
-    button.classList.add('button');
-    return button;
-  }
+  } 
 }
 
 let bank = new Bank();
