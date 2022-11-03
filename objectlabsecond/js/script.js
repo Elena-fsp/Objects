@@ -100,22 +100,6 @@ class Bank {
     let client = this.clients.find(client => client.identificationСode === identificationСode);
     return client;
   }
-  showAllMoney() {
-    document.querySelector('.calc_all_money').addEventListener('click', function(event) {
-      event.preventDefault();
-      let sum = this.calcAllMoney();
-      return sum;
-    })
-  }
-  calcAllMoney() {
-    let accounts = [];
-    this.clients.forEach(client => {
-      for(let key in client) {
-        if(key === 'accounts') {
-          accounts.push(client[key]);
-        }}})
-    return console.log(accounts);
-  }
 } 
 class Client {
   constructor(information) {
